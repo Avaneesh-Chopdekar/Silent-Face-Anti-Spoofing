@@ -9,13 +9,14 @@ import os
 import cv2
 import math
 import torch
+import traceback
 import numpy as np
 import torch.nn.functional as F
 
 
-from src.model_lib.MiniFASNet import MiniFASNetV1, MiniFASNetV2,MiniFASNetV1SE,MiniFASNetV2SE
-from src.data_io import transform as trans
-from src.utility import get_kernel, parse_model_name
+from antispoofing.src.model_lib.MiniFASNet import MiniFASNetV1, MiniFASNetV2,MiniFASNetV1SE,MiniFASNetV2SE
+from antispoofing.src.data_io import transform as trans
+from antispoofing.src.utility import get_kernel, parse_model_name
 
 MODEL_MAPPING = {
     'MiniFASNetV1': MiniFASNetV1,
@@ -27,8 +28,20 @@ MODEL_MAPPING = {
 
 class Detection:
     def __init__(self):
-        caffemodel = "./resources/detection_model/Widerface-RetinaFace.caffemodel"
-        deploy = "./resources/detection_model/deploy.prototxt"
+        stack = traceback.extract_stack()
+        dirname = os.path.dirname(stack[-2].filename)
+        caffemodel = os.path.join(
+            dirname,
+            "..",
+            "resources",
+            "detection_model",
+            "Widerface-RetinaFace.caffemodel",
+        )
+        # caffemodel = "./resources/detection_model/Widerface-RetinaFace.caffemodel"
+        deploy = os.path.join(
+            dirname, "..", "resources", "detection_model", "deploy.prototxt"
+        )
+        # deploy = "./resources/detection_model/deploy.prototxt"
         self.detector = cv2.dnn.readNetFromCaffe(deploy, caffemodel)
         self.detector_confidence = 0.6
 
